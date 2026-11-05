@@ -1,0 +1,204 @@
+/* SystemEngineeringBKM: the slide deck page. Loaded after book.css, on deck pages only.
+   Every slide is a 1280 by 720 canvas. deck.js fits its text, then scales the whole canvas to the
+   stage, so a slide looks the same on every screen. Without JavaScript the slides are stacked. */
+
+.deck-page { max-width: 1240px; margin: 0 auto; padding: 24px 20px 40px; }
+.deck-head {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 16px 28px; margin-bottom: 20px;
+}
+.deck-head-text { flex: 1 1 420px; min-width: 0; }
+.deck-head h1 { margin: 6px 0 8px; font-size: clamp(26px, 3.6vw, 36px); line-height: 1.25; }
+.deck-lead { margin: 0; max-width: 46em; color: var(--muted); font-size: 17px; }
+.deck-head .actions { margin-top: 0; }
+
+/* The stage and the canvas */
+.deck { position: relative; container-type: inline-size; }
+.deck-stage { position: relative; }
+.js .deck-stage {
+  height: 56.25vw;
+  height: min(56.25cqw, calc(100vh - 190px));
+  min-height: 240px;
+  min-height: min(240px, 56.25cqw); overflow: hidden;
+  border-radius: 16px; background: #0d1422; box-shadow: var(--shadow);
+}
+.js .deck-viewport { position: absolute; top: 0; left: 0; width: 1280px; height: 720px; transform-origin: 0 0; }
+.js .deck:not(.ready) .deck-viewport { opacity: 0; }
+.js .slide {
+  position: absolute; inset: 0; visibility: hidden; opacity: 0;
+  transition: opacity .25s ease, visibility 0s linear .25s;
+}
+.js .slide.active { visibility: visible; opacity: 1; transition: opacity .25s ease; }
+
+/* A slide. Its colours are set here again, so the slides stay light in the dark theme. */
+.slide-in {
+  --bg: #f7f8fb; --panel: #ffffff; --ink: #17202e; --muted: #556173; --line: #dfe4ec;
+  --accent: #1d4ed8; --accent-ink: #ffffff; --accent-soft: #e0e8fb;
+  --red: #c0262d; --red-soft: #fbe6e7; --green: #15803d; --green-soft: #e3f4e8;
+  --warm: #b4580c; --warm-soft: #fdf0e3; --zebra: #f9fafc; --shadow: none;
+  --k: 1;
+  position: relative; width: 1280px; height: 720px; overflow: hidden;
+  display: flex; flex-direction: column; padding: 58px 76px 0;
+  background: #fff; color: var(--ink); color-scheme: light;
+  font-size: calc(26px * var(--k)); line-height: 1.5; text-align: right;
+}
+.slide-in::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+  background: linear-gradient(to left, #1d4ed8 0 80%, #15803d 80% 90%, #c0262d 90% 100%);
+}
+.slide-title {
+  flex: none; margin: 0 0 calc(18px * var(--k));
+  font-size: calc(46px * var(--k)); font-weight: 800; line-height: 1.2; color: var(--ink);
+}
+.slide-message {
+  flex: none; margin: 0 0 calc(24px * var(--k)); padding: calc(12px * var(--k)) calc(22px * var(--k));
+  border-radius: 12px; background: var(--accent-soft); color: #1e3a8a;
+  font-size: calc(28px * var(--k)); font-weight: 600; line-height: 1.4;
+}
+.slide-body {
+  flex: 1 0 auto; display: flex; flex-direction: column; min-height: 0;
+  padding-bottom: calc(18px * var(--k));
+}
+.slide-body > * { margin: 0 0 calc(14px * var(--k)); }
+.slide-body > :last-child { margin-bottom: 0; }
+.slide-body ul, .slide-body ol { padding-inline-start: 1.25em; }
+.slide-body li { margin: .22em 0; }
+.slide-body li::marker { color: var(--accent); }
+.slide-body li > strong:first-child { color: #1e3a8a; }
+.slide-body .table-wrap { flex: none; border-radius: 10px; }
+.slide-body .table-wrap table { min-width: 0; font-size: calc(22px * var(--k)); line-height: 1.4; }
+.slide-body .table-wrap th, .slide-body .table-wrap td { padding: calc(8px * var(--k)) calc(14px * var(--k)); }
+.slide-body blockquote.note { font-size: calc(20px * var(--k)); line-height: 1.6; padding: calc(10px * var(--k)) calc(18px * var(--k)); }
+.slide-body pre.code { font-size: calc(18px * var(--k)); }
+
+/* A diagram takes the room left on its slide and is drawn to fit it */
+.slide-body .diagram {
+  flex: 1 1 0; min-height: calc(160px * var(--k)); position: relative;
+  padding: 0; border: 0; border-radius: 0; background: none;
+}
+.js .slide-body .diagram pre.mermaid[data-processed]:not(.failed) {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+}
+.js .slide-body .diagram pre svg { width: 100%; height: 100%; max-width: 100% !important; }
+
+.slide-foot {
+  flex: none; display: flex; align-items: center; justify-content: space-between;
+  height: 56px; margin-top: auto; border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 17px;
+}
+.slide-num { font-weight: 700; color: var(--accent); }
+
+/* The cover slide */
+.slide.cover .slide-in {
+  justify-content: center; padding: 0 110px 56px; color: #fff;
+  background: radial-gradient(120% 130% at 85% 10%, #2f63e8 0%, #1d4ed8 45%, #0f2a7a 100%);
+}
+.slide.cover .slide-in::before { display: none; }
+.slide-kicker { flex: none; margin: 0 0 calc(14px * var(--k)); color: #bcd0ff; font-size: calc(26px * var(--k)); font-weight: 600; }
+.slide.cover .slide-title { margin-bottom: calc(24px * var(--k)); color: #fff; font-size: calc(64px * var(--k)); line-height: 1.15; }
+.slide.cover .slide-message { background: rgba(255, 255, 255, .12); color: #fff; }
+.slide.cover .slide-body { flex: none; padding-bottom: 0; color: #dbe5ff; }
+.slide.cover .slide-body li::marker { color: #bcd0ff; }
+.slide.cover .slide-body li > strong:first-child { color: #fff; }
+.slide.cover .slide-foot {
+  position: absolute; left: 110px; right: 110px; bottom: 0;
+  border-top-color: rgba(255, 255, 255, .22); color: #bcd0ff;
+}
+.slide.cover .slide-num { color: #fff; }
+
+/* The control bar under the stage */
+.deck-bar { display: none; }
+.js .deck-bar {
+  display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 8px 10px;
+  border: 1px solid var(--line); border-radius: 14px; background: var(--panel);
+}
+.deck-bar button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-width: 44px; min-height: 44px; padding: 0 12px; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  font: 600 15px/1 var(--font);
+}
+.deck-bar button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.deck-bar button:disabled { opacity: .4; cursor: default; }
+.deck-bar button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.deck-count { min-width: 8.5em; text-align: center; white-space: nowrap; color: var(--muted); font-size: 15px; }
+.deck-count b { color: var(--ink); }
+.deck-progress { flex: 1 1 auto; min-width: 24px; height: 6px; overflow: hidden; border-radius: 3px; background: var(--line); }
+.deck-progress span {
+  display: block; height: 100%; background: var(--accent);
+  transform: scaleX(0); transform-origin: right; transition: transform .25s;
+}
+
+/* Speaker notes: one panel under the stage, which follows the current slide */
+.deck-notes { display: none; }
+.js .deck-notes {
+  display: block; margin-top: 14px; padding: 16px 20px;
+  border: 1px solid var(--line); border-radius: 14px; background: var(--panel);
+}
+.deck-notes h2 { margin: 0 0 6px; color: var(--muted); font-size: 14px; font-weight: 700; letter-spacing: .03em; }
+.deck-notes-body { font-size: 17px; line-height: 1.8; }
+.deck-notes-body > p { margin: 0 0 .6em; }
+.deck-notes-body > :last-child { margin-bottom: 0; }
+.js .slide-notes { display: none; }
+.slide-notes {
+  margin: 10px 0 0; padding: 12px 18px; border: 1px dashed var(--line); border-radius: 12px;
+  color: var(--muted); font-size: 15px; line-height: 1.75;
+}
+.slide-notes-title { margin: 0 0 4px; font-size: 13px; font-weight: 700; color: var(--ink); }
+.slide-notes-body > p { margin: 0 0 .5em; }
+.slide-notes-body > :last-child { margin-bottom: 0; }
+
+.deck-help { display: none; }
+.js .deck-help { display: block; margin: 14px 0 0; color: var(--muted); font-size: 14px; text-align: center; }
+@media (hover: none) { .js .deck-help { display: none; } }
+kbd {
+  display: inline-block; min-width: 1.7em; padding: 1px 7px; text-align: center;
+  border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px;
+  background: var(--panel); color: var(--ink); font: 600 12.5px/1.5 var(--font);
+}
+.deck-page > .page-end { margin-top: 32px; }
+
+/* Without JavaScript: the slides one under the other, each with its notes */
+html:not(.js) .slide { margin-bottom: 22px; }
+html:not(.js) .slide-in {
+  --k: .62; width: auto; height: auto; padding: 30px 32px 0;
+  border: 1px solid var(--line); border-radius: 14px;
+}
+html:not(.js) .slide.cover .slide-in { padding: 40px 32px 72px; }
+html:not(.js) .slide.cover .slide-foot { left: 32px; right: 32px; }
+html:not(.js) .slide-body .diagram { flex: none; min-height: 0; }
+
+/* Full screen: deck.js sets .is-full, which also covers Safari's prefixed API */
+.deck.is-full {
+  --panel: #111827; --line: #263142; --ink: #e9eef5; --muted: #a3afc0; --accent: #7ea6ff; --accent-soft: #17254a;
+  display: flex; flex-direction: column; padding: 12px; background: #000;
+}
+.js .deck.is-full .deck-stage { flex: 1 1 auto; height: auto; min-height: 0; border-radius: 0; background: #000; box-shadow: none; }
+.deck.is-full .deck-bar { margin-top: 10px; }
+.deck-full .i-exit, .deck.is-full .deck-full .i-enter { display: none; }
+.deck.is-full .deck-full .i-exit { display: block; }
+
+/* Phones */
+@media (max-width: 640px) {
+  .deck-page { padding: 16px 12px 32px; }
+  .js .deck-stage { border-radius: 10px; }
+  .js .deck-bar { gap: 6px; padding: 6px; }
+  .deck-bar button { padding: 0 10px; }
+  .deck-count { min-width: 0; font-size: 14px; }
+  .deck-notes-toggle span {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+}
+
+/* Print: one slide per page, at the size of the slide */
+@media print {
+  @page { size: 13.333in 7.5in; margin: 0; }
+  body { background: #fff; }
+  .skip, .top, .deck-head, .deck-bar, .deck-notes, .deck-help, .page-end, .site, .to-top, .slide-notes { display: none !important; }
+  .deck-page { max-width: none; padding: 0; }
+  .js .deck-stage, .deck-stage { height: auto !important; overflow: visible; border-radius: 0; background: none; box-shadow: none; }
+  .js .deck-viewport, .deck-viewport { position: static; width: auto; height: auto; transform: none !important; opacity: 1 !important; }
+  .js .slide, .slide { position: relative; inset: auto; visibility: visible; opacity: 1; margin: 0; break-after: page; }
+  .slide-in, html:not(.js) .slide-in { width: 1280px; height: 720px; border: 0; border-radius: 0; }
+}

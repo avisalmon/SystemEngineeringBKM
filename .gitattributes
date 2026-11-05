@@ -6,3 +6,5 @@
 *.xlsx binary
 *.pptx binary
 *.ps1 text eol=crlf
+assets/vendor/** -text -diff linguist-vendored
+course/**/*.html linguist-generated
