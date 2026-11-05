@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>הנדסת מערכות עם מנטור AI | SystemEngineeringBKM</title>
+<meta name="description" content="משכפלים, פותחים בעורך עם צ'אט AI ושואלים &quot;מה אני עושה פה?&quot;. הצ'אט מלווה אתכם בבניית מערכת חדשה, מהצורך ועד הקונספט הנבחר, לפי שיטת ICDM של ד&quot;ר עמיהוד הרי ותקני הנדסת המערכות. ובנוסף: ספר הקורס.">
+<style>
+  :root {
+    --bg: #f7f8fb;
+    --panel: #ffffff;
+    --ink: #17202e;
+    --muted: #556173;
+    --line: #dfe4ec;
+    --accent: #1d4ed8;
+    --accent-ink: #ffffff;
+    --accent-soft: #e0e8fb;
+    --red: #c0262d;
+    --red-soft: #fbe6e7;
+    --green: #15803d;
+    --green-soft: #e3f4e8;
+    --warm: #b4580c;
+    --warm-soft: #fdf0e3;
+    --code-bg: #101722;
+    --code-ink: #e6edf5;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 4px 16px rgba(16, 24, 40, .06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e131b; --panel: #161d28; --ink: #e9eef5; --muted: #a3afc0; --line: #273142;
+      --accent: #7ea6ff; --accent-ink: #0b1530; --accent-soft: #17254a;
+      --red: #ff8a8f; --red-soft: #3a1b1e; --green: #6fd394; --green-soft: #153122;
+      --warm: #f2a65a; --warm-soft: #33251a; --code-bg: #0a0f16; --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e131b; --panel: #161d28; --ink: #e9eef5; --muted: #a3afc0; --line: #273142;
+    --accent: #7ea6ff; --accent-ink: #0b1530; --accent-soft: #17254a;
+    --red: #ff8a8f; --red-soft: #3a1b1e; --green: #6fd394; --green-soft: #153122;
+    --warm: #f2a65a; --warm-soft: #33251a; --code-bg: #0a0f16; --shadow: none;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", "Heebo", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+  }
+  a { color: var(--accent); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .id, code {
+    font-family: Consolas, "Cascadia Mono", monospace; font-weight: 600; color: var(--accent);
+    direction: ltr; unicode-bidi: isolate;
+  }
+
+  /* top bar */
+  .top {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 56px; }
+  .brand { font-weight: 700; display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
+  .brand-dot { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); box-shadow: inset 0 -3px 0 rgba(0,0,0,.2); }
+  .nav { display: flex; gap: 18px; font-size: 15px; }
+  .nav a { color: var(--muted); text-decoration: none; }
+  .nav a:hover { color: var(--accent); }
+
+  /* hero */
+  .hero { padding: 48px 0 32px; }
+  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 40px; align-items: center; }
+  .eyebrow { color: var(--accent); font-weight: 600; font-size: 15px; letter-spacing: .02em; }
+  h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.2; margin: 8px 0 16px; }
+  .lead { color: var(--muted); font-size: 19px; max-width: 34em; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 600;
+    border-radius: 10px; padding: 11px 20px; border: 1px solid var(--accent); min-height: 44px;
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); }
+  .btn.ghost { color: var(--accent); background: transparent; }
+  .updated { display: inline-flex; gap: 8px; margin-top: 20px; font-size: 14px; color: var(--muted); text-decoration: none; }
+  .updated b { color: var(--ink); font-weight: 600; }
+
+  /* the chat window in the hero */
+  .chat { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; font-size: 15px; line-height: 1.6; }
+  .chat-bar { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+  .chat-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .chat-bar span { margin-inline-start: 8px; }
+  .chat-body { padding: 12px 14px; display: grid; gap: 10px; }
+  .msg { border-radius: 10px; padding: 8px 12px; }
+  .msg .lbl { display: block; font-size: 12px; font-weight: 700; color: var(--muted); }
+  .msg.you { background: var(--accent-soft); }
+  .msg.ai { background: var(--bg); border: 1px solid var(--line); }
+  .chat-input { margin: 0 14px 14px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; color: var(--muted); font-size: 14px; }
+  .chat-input .caret { display: inline-block; width: 2px; height: 15px; background: var(--accent); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+
+  /* four stages under the hero */
+  .stages { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 40px; }
+  .stage { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); text-decoration: none; color: var(--ink); display: block; }
+  .stage:hover { border-color: var(--accent); }
+  .stage .n { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: .04em; }
+  .stage h3 { margin: 2px 0 6px; }
+  .stage p { font-size: 15px; color: var(--muted); }
+
+  /* sections */
+  section { padding: 44px 0; scroll-margin-top: 56px; }  /* the sticky header must not cover a heading jumped to */
+  section + section { border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(24px, 3.4vw, 32px); line-height: 1.3; margin-bottom: 8px; }
+  .sub { color: var(--muted); max-width: 44em; margin-bottom: 24px; }
+  h3 { font-size: 19px; margin-bottom: 6px; }
+  .grid { display: grid; gap: 16px; }
+  .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); }
+  .card p { color: var(--muted); font-size: 16px; }
+  .icon { font-size: 26px; line-height: 1; margin-bottom: 10px; }
+  .block-title { margin: 28px 0 12px; }
+  .prereq { margin-bottom: 32px; }
+  .prereq ul { padding-inline-start: 22px; margin: 6px 0; color: var(--muted); }
+  #say { scroll-margin-top: 72px; }
+
+  /* steps */
+  .step { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 16px; margin-bottom: 28px; }
+  .num {
+    width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 20px;
+  }
+  .step p, .step li { color: var(--muted); }
+  .step ul, .step ol { padding-inline-start: 22px; margin-top: 6px; }
+  .check { font-size: 15px; margin-top: 8px; color: var(--ink) !important; }
+  .check::before { content: "✓ "; color: var(--accent); font-weight: 700; }
+
+  /* "what is a terminal" explainer */
+  .explain { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-top: 12px; }
+  .explain h4 { font-size: 17px; margin-bottom: 6px; }
+  .explain p, .explain li { color: var(--muted); font-size: 16px; }
+  .explain ol { padding-inline-start: 22px; margin-top: 6px; }
+  .explain li + li { margin-top: 6px; }
+  .prompt-demo {
+    direction: ltr; text-align: left; background: var(--code-bg); color: var(--code-ink); border-radius: 8px;
+    padding: 10px 14px; font-family: Consolas, "Cascadia Mono", monospace; font-size: 14px; margin: 8px 0; overflow-x: auto;
+  }
+  .prompt-demo .cursor { display: inline-block; width: 8px; height: 15px; background: var(--code-ink); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .prompt-demo .cursor, .chat-input .caret { animation: none; } }
+  kbd {
+    font-family: Consolas, "Cascadia Mono", monospace; font-size: 14px; border: 1px solid var(--line);
+    border-bottom-width: 2px; border-radius: 5px; padding: 0 6px; background: var(--bg); color: var(--ink);
+    direction: ltr; unicode-bidi: isolate;
+  }
+  details { margin-top: 12px; }
+  summary { cursor: pointer; color: var(--accent); font-weight: 600; min-height: 32px; }
+  .stage-tag {
+    display: inline-block; font-size: 14px; font-weight: 700; color: var(--accent); background: var(--accent-soft);
+    border-radius: 999px; padding: 2px 12px; margin-bottom: 8px;
+  }
+
+  pre {
+    direction: ltr; text-align: left; background: var(--code-bg); color: var(--code-ink);
+    border-radius: 10px; padding: 16px 18px; overflow-x: auto; font-size: 15px; line-height: 1.6;
+    font-family: Consolas, "Cascadia Mono", monospace; position: relative; margin-top: 10px;
+  }
+  pre code { color: inherit; font-weight: 400; }
+  .copy {
+    position: absolute; top: 8px; right: 8px; font: inherit; font-size: 13px; cursor: pointer;
+    background: rgba(255,255,255,.1); color: var(--code-ink); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 6px; padding: 2px 10px; min-height: 30px;
+  }
+  .say {
+    margin-top: 10px; background: var(--accent-soft); border-inline-start: 4px solid var(--accent);
+    border-radius: 8px; padding: 14px 18px; font-size: 22px; font-weight: 700; color: var(--ink);
+  }
+  .note { align-self: start; background: var(--warm-soft); border-radius: 10px; padding: 14px 18px; color: var(--ink); font-size: 16px; margin-top: 16px; }
+  .note b { color: var(--warm); }
+
+  /* tables */
+  .table-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+  table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  th, td { text-align: start; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 14px; }
+  tr:last-child td { border-bottom: 0; }
+  .phases { min-width: 680px; }
+  .phases td:first-child { width: 52px; }
+  .phases th { white-space: nowrap; }
+  .phase-no {
+    display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent); font-weight: 700;
+  }
+  .who td:first-child { width: 50%; }
+
+  /* ICDM thinking modes */
+  .modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 20px; }
+  .mode { background: var(--s); border-radius: 12px; padding: 14px 18px; }
+  .mode h3 { color: var(--m); display: flex; align-items: center; gap: 8px; }
+  .mode h3::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--m); flex: none; }
+  .mode p { color: var(--ink); font-size: 15px; }
+  .mode.blue { --m: var(--accent); --s: var(--accent-soft); }
+  .mode.red { --m: var(--red); --s: var(--red-soft); }
+  .mode.green { --m: var(--green); --s: var(--green-soft); }
+
+  /* course meetings */
+  .meetings { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin: 16px 0; list-style: none; }
+  .meeting { display: block; height: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 15px; color: var(--ink); text-decoration: none; }
+  a.meeting:hover { border-color: var(--accent); }
+  .meeting .t { display: block; color: var(--muted); font-size: 13px; }
+  .meeting.ready .t { color: var(--accent); font-weight: 600; }
+  .meeting.soon { color: var(--muted); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 15px; }
+
+  footer { padding: 32px 0 48px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
+
+  @media (max-width: 860px) {
+    .hero .wrap, .g2, .modes { grid-template-columns: minmax(0, 1fr); }
+    .g4, .g3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    .nav { display: none; }
+  }
+  @media (max-width: 520px) {
+    body { font-size: 16px; }
+    .wrap { padding: 0 16px; }
+    .g4, .g3 { grid-template-columns: minmax(0, 1fr); }
+    .step { grid-template-columns: 36px minmax(0, 1fr); gap: 12px; }
+    .num { width: 34px; height: 34px; font-size: 17px; }
+    .say { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="brand-dot" aria-hidden="true"></span><bdi class="brand-name">SystemEngineeringBKM</bdi></a>
+    <nav class="nav" aria-label="ניווט בעמוד">
+      <a href="#start">מתחילים</a>
+      <a href="#journey">המסע</a>
+      <a href="#outputs">מה יוצא</a>
+      <a href="#course">ספר הקורס</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">שיטת ICDM · צרכים · דרישות · בדיקות · עקיבות · מסמכים</p>
+      <h1>בונים מערכת חדשה, מהצורך ועד הקונספט, עם מנטור AI לצידכם.</h1>
+      <p class="lead">משכפלים, פותחים בעורך עם צ'אט AI ושואלים "מה אני עושה פה?". מכאן הצ'אט מלווה אתכם: מראיין ומתמלל, כותב צרכים, דרישות ובדיקות, שומר על עקיבות, בודק שהכול מחובר ומנוסח נכון, ומפיק מסמכים פורמליים, מצגות ולוח בקרה. הכול לפי שיטת ICDM של ד"ר עמיהוד הרי ותקני הנדסת המערכות.</p>
+      <div class="cta">
+        <a class="btn primary" href="#start">מתחילים</a>
+        <a class="btn ghost" href="#course">ספר הקורס</a>
+      </div>
+      <!-- last-updated:start -->
+      <a class="updated" href="https://github.com/avisalmon/SystemEngineeringBKM/blob/main/docs/lessons_log.md"><span><b>עודכן לאחרונה 5 בנובמבר 2026</b> · מה חדש &larr;</span></a>
+      <!-- last-updated:end -->
+    </div>
+    <div class="chat" aria-label="דוגמה לשיחה עם המנטור">
+      <div class="chat-bar" aria-hidden="true"><i></i><i></i><i></i><span>צ'אט</span></div>
+      <div class="chat-body">
+        <p class="msg you"><span class="lbl">אתם</span>מה אני עושה פה?</p>
+        <p class="msg ai"><span class="lbl">הצ'אט</span>ברוכים הבאים. נבנה יחד מערכת חדשה, מהצורך ועד הקונספט. נתחיל בשאלה אחת: איזו בעיה המערכת פותרת? ספרו על הבעיה, עוד בלי הפתרון.</p>
+        <p class="msg you"><span class="lbl">אתם</span>רובוט שמנקה חלונות במגדלים.</p>
+        <p class="msg ai"><span class="lbl">הצ'אט</span>רובוט זה כבר פתרון. מה הצורך שמאחוריו? אולי "חלונות נקיים במגדל, בלי לסכן אף אחד". אם זה מתאים, ארשום אותו בתור <span class="id">NEED-001</span>, ואז נמפה מי מחזיק בצורך: הדיירים, ועד הבית, חברת הניקיון והרגולטור.</p>
+      </div>
+      <div class="chat-input" aria-hidden="true">כתבו כאן <span class="caret"></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="stages">
+    <a class="stage" href="#start"><span class="n">01</span><h3>מתקינים</h3><p>עורך, Git וצ'אט AI, ומשכפלים את המאגר בכמה לחיצות.</p></a>
+    <a class="stage" href="#say"><span class="n">02</span><h3>שואלים</h3><p>כותבים בצ'אט "מה אני עושה פה?", ומכאן הוא מוביל.</p></a>
+    <a class="stage" href="#journey"><span class="n">03</span><h3>בונים מערכת</h3><p>תשעה שלבים, מהצורך ועד הקונספט הנבחר, עם מסמכים בכל שער.</p></a>
+    <a class="stage" href="#course"><span class="n">04</span><h3>לומדים</h3><p>ספר הקורס של ד"ר עמיהוד הרי, פרק לכל מפגש.</p></a>
+  </div>
+</div>
+
+<section id="start">
+  <div class="wrap">
+    <span class="stage-tag">מתחילים</span>
+    <h2>שלושה צעדים, ואז הצ'אט מוביל</h2>
+    <p class="sub">לא צריך לדעת git, Python או תכנות. צריך מחשב, עורך עם צ'אט AI ועשר דקות. את כל השאר הצ'אט מסביר, מתקין או מראה איך.</p>
+
+    <div class="card prereq">
+      <h3>לפני שמתחילים: שלושה דברים במחשב</h3>
+      <ul>
+        <li><b>VS Code</b>, העורך. הורדה חינמית מ-<a href="https://code.visualstudio.com/">code.visualstudio.com</a>.</li>
+        <li><b>Git</b>, שמוריד את המאגר ומעדכן אותו. הורדה מ-<a href="https://git-scm.com/downloads">git-scm.com</a>, ובהתקנה מאשרים את ברירות המחדל.</li>
+        <li><b>צ'אט AI אחד בתוך העורך</b>: GitHub Copilot במצב Agent, או Claude Code. אפשר גם Cursor במקום VS Code.</li>
+      </ul>
+      <p class="check">כותבים בצ'אט "שלום" ומקבלים תשובה.</p>
+    </div>
+
+    <div class="step">
+      <div class="num">1</div>
+      <div>
+        <h3>משכפלים את המאגר, בלחיצות</h3>
+        <ol>
+          <li>ב-VS Code לוחצים <bdi dir="ltr"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></bdi>, כותבים <kbd>Git: Clone</kbd> ובוחרים בו.</li>
+          <li>מדביקים את הכתובת הזו ולוחצים Enter:</li>
+        </ol>
+        <pre><button class="copy" type="button">העתקה</button><code>https://github.com/avisalmon/SystemEngineeringBKM.git</code></pre>
+        <ol start="3">
+          <li>בוחרים תיקייה, למשל <code>C:\se</code>, וכשהעורך שואל לוחצים Open.</li>
+          <li>אם העורך שואל אם לסמוך על המחברים, לוחצים "Yes, I trust the authors".</li>
+        </ol>
+        <p class="check">בסרגל הקבצים של העורך רואים את התיקייה SystemEngineeringBKM.</p>
+        <details>
+          <summary>מעדיפים טרמינל?</summary>
+          <div class="explain">
+            <h4>מה זה טרמינל?</h4>
+            <p>חלון שבו כותבים פקודות למחשב במקום ללחוץ על כפתורים. ב-VS Code פותחים אותו מהתפריט Terminal ואז New Terminal. כך נראית שורת הפקודה:</p>
+            <div class="prompt-demo">PS C:\Users\you&gt; <span class="cursor"></span></div>
+            <p>מעתיקים את ארבע השורות, מדביקים בטרמינל ולוחצים Enter. השורה האחרונה פותחת את המאגר בעורך.</p>
+          </div>
+          <pre><button class="copy" type="button">העתקה</button><code>mkdir C:\se
+cd C:\se
+git clone https://github.com/avisalmon/SystemEngineeringBKM.git
+code SystemEngineeringBKM</code></pre>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num">2</div>
+      <div>
+        <h3>פותחים את הצ'אט</h3>
+        <ul>
+          <li>GitHub Copilot ב-VS Code: לוחצים <bdi dir="ltr"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>I</kbd></bdi>, ובתחתית החלון בוחרים במצב Agent.</li>
+          <li>Claude Code: פותחים טרמינל בתיקיית המאגר וכותבים <code>claude</code>.</li>
+          <li>Cursor: לוחצים <bdi dir="ltr"><kbd>Ctrl</kbd>+<kbd>L</kbd></bdi>.</li>
+        </ul>
+        <p class="check">הצ'אט פתוח, והתיקייה SystemEngineeringBKM פתוחה בעורך.</p>
+      </div>
+    </div>
+
+    <div class="step" id="say">
+      <div class="num">3</div>
+      <div>
+        <h3>כותבים בצ'אט:</h3>
+        <div class="say">מה אני עושה פה?</div>
+        <p>מכאן הצ'אט מוביל: מסביר מה יש כאן, בודק מה מותקן, מתקין את מה שחסר, ופותח איתכם פרויקט חדש או ממשיך פרויקט קיים.</p>
+        <div class="note"><b>אין פקודות להקליד.</b> כשהצ'אט צריך להריץ משהו, הוא מציג את הפקודה ומבקש אישור. לוחצים Allow או Run, ואם משהו לא ברור, שואלים אותו "מה זה עושה?".</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="journey">
+  <div class="wrap">
+    <span class="stage-tag">המסע</span>
+    <h2>מהצורך ועד הקונספט הנבחר, בתשעה שלבים</h2>
+    <p class="sub">כל שלב נגמר במשהו שאפשר לראות ולהציג. השיטה איטרטיבית, אז אפשר לחזור לשלב קודם, ובכל שער נשמרת תמונת מצב של הפרויקט (baseline). השלבים 2 עד 8 צמודים לשלבי ICDM ולמפגשי הקורס.</p>
+    <div class="table-wrap">
+      <table class="phases">
+        <thead><tr><th>#</th><th>שלב</th><th>שלב ב-ICDM</th><th>מה יש לכם בסוף</th></tr></thead>
+        <tbody>
+          <tr><td><span class="phase-no">0</span></td><td>צ'אט שעובד</td><td></td><td>הצ'אט עונה בעברית ומציג את המסע.</td></tr>
+          <tr><td><span class="phase-no">1</span></td><td>מחשב מוכן</td><td></td><td>בדיקת הסביבה ירוקה, וקובץ Word לדוגמה נפתח. אפשר להוסיף מודל תמלול מקומי.</td></tr>
+          <tr><td><span class="phase-no">2</span></td><td>פרויקט, צוות וצורך</td><td>הכנה</td><td>מאגר לפרויקט, הצורך מנוסח כתועלת או כבעיה (בלי פתרון), צוות, טבלת תרגיל 1 ולוח בקרה ראשון.</td></tr>
+          <tr><td><span class="phase-no">3</span></td><td>לקוחות וצרכים</td><td>1</td><td>מפת בעלי עניין, ראיונות, תרחישי ייחוס, עץ צרכים עם קו גיזום, סדרי עדיפויות, מוצרי ייחוס והשוואה ראשונה.</td></tr>
+          <tr><td><span class="phase-no">4</span></td><td>מהצרכים למפרט</td><td>2</td><td>מאפיינים, ממשקים חיצוניים, בית האיכות (HOQ), השוואה שנייה, טבלת החלטות, PBS וחבילת סקירת SRR.</td></tr>
+          <tr><td><span class="phase-no">5</span></td><td>הפשטה ועקרונות פתרון</td><td>3 עד 5</td><td>ניתוח פונקציונלי, FAST, בעיות בסיסיות, עקרונות פתרון עם Red Team של AI, אמות מידה וטבלה מורפולוגית.</td></tr>
+          <tr><td><span class="phase-no">6</span></td><td>קונספטים וקונספטים ראשיים</td><td>6 עד 7</td><td>כרטיסי קונספט, מטריצת Pugh, ולפחות שלושה קונספטים ראשיים שונים מהותית.</td></tr>
+          <tr><td><span class="phase-no">7</span></td><td>ארכיטקטורה של הקונספטים הראשיים</td><td>8</td><td>תרשימי בלוקים, ממשקים ו-ICD, סקירה של "מהנדס מערכת ביקורתי", תפיסות הפעלה ואחזקה, טבלת תאימות ותדריכי תכן תלת-ממדי.</td></tr>
+          <tr><td><span class="phase-no">8</span></td><td>בחירה סופית והצגה</td><td>9 עד 10</td><td>הקונספט הנבחר, דוח מסכם ומצגת למשקיעים.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note"><b>שער בסוף כל שלב.</b> בדיקת הפרויקט עוברת בלי שגיאות, כל אזהרה מתוקנת או מנומקת בהחלטה רשומה, רשימת התיוג של השלב סגורה והמסמכים מופקים. שלב 4 נגמר בסקירת SRR.</p>
+
+    <h3 class="block-title">מי עושה מה</h3>
+    <div class="table-wrap">
+      <table class="who">
+        <thead><tr><th>אתם</th><th>הצ'אט</th></tr></thead>
+        <tbody>
+          <tr><td>מראיינים לקוחות, צופים בשימוש ואוספים חומר.</td><td>מכין מדריך ראיון, מתמלל, ושולף צרכים מהתמליל עם הציטוט שממנו באו.</td></tr>
+          <tr><td>מחליטים, מצביעים ומאשרים.</td><td>מנסח טיוטות של צרכים, דרישות ובדיקות, ומסמן אותן כטיוטת AI עד שתאשרו.</td></tr>
+          <tr><td>שואלים, מערערים ומבקשים נימוק.</td><td>בודק עקיבות וניסוח, ומפעיל Red Team שמחפש חורים.</td></tr>
+          <tr><td>חותמים על המסמכים.</td><td>מפיק Word, Excel, PDF, מצגות ולוח בקרה.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note"><b>אדם, בינה, אדם.</b> אתם פותחים, הבינה מכינה, ואתם בודקים ומחליטים. האחריות על המערכת נשארת שלכם.</p>
+  </div>
+</section>
+
+<section id="outputs">
+  <div class="wrap">
+    <span class="stage-tag">מה יוצא</span>
+    <h2>מסמכים פורמליים, לא רק שיחה</h2>
+    <p class="sub">כל מה שנכתב בפרויקט נשמר כקובצי JSON אצלכם במחשב, ומהם מופקים המסמכים. משנים פריט אחד ומפיקים מחדש, והכול נשאר מסונכרן.</p>
+    <div class="grid g3">
+      <div class="card"><div class="icon" aria-hidden="true">📄</div><h3>מסמכים פורמליים</h3><p>תפיסה מבצעית (OCD), דרישות בעלי עניין (StRS), מפרט מערכת (SyRS או SSS), מטריצת עקיבות (RTM) ומסמך ממשקים (ICD), ב-Word, Excel ו-PDF.</p></div>
+      <div class="card"><div class="icon" aria-hidden="true">📊</div><h3>מצגות</h3><p>נגזרות מהמסמכים ולא נכתבות מחדש. לסקירה, לשער או להצגה בכיתה.</p></div>
+      <div class="card"><div class="icon" aria-hidden="true">🧭</div><h3>לוח בקרה ורשימת תיוג</h3><p>דפי HTML שנפתחים מהמחשב, בלי שרת: מצב המערכת, מה חסר ומה הבא בתור.</p></div>
+      <div class="card"><div class="icon" aria-hidden="true">🔗</div><h3>עקיבות מלאה</h3><p>לכל פריט מזהה קבוע, כמו <span class="id">NEED-001</span> או <span class="id">REQ-014</span>. לכל דרישה יש צורך שהוליד אותה ובדיקה שמאמתת אותה.</p></div>
+      <div class="card"><div class="icon" aria-hidden="true">🧩</div><h3>תרשימים</h3><p>תרשימי בלוקים, ממשקים ו-UML, שנבנים מהנתונים ומתעדכנים איתם.</p></div>
+      <div class="card"><div class="icon" aria-hidden="true">🛠️</div><h3>תדריכי תכן תלת-ממדי</h3><p>תדריך לכל רכיב מכני, מוכן לתכנון ב-<a href="https://github.com/avisalmon/Fusion360BKM">Fusion360BKM</a>.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap">
+    <span class="stage-tag">השיטה והתקנים</span>
+    <h2>שיטת ICDM, בשפה של התקנים</h2>
+    <p class="sub">השיטה היא ICDM ותהליך QRD של ד"ר עמיהוד הרי, שנבחנו בתעשייה הישראלית. התקנים נותנים את השמות, את הסקירות ואת צורת המסמכים שלקוחות ותוכניות ביטחוניות מצפים להם.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>תקן</th><th>מה הוא נותן כאן</th></tr></thead>
+        <tbody>
+          <tr><td><bdi>ISO/IEC/IEEE 15288</bdi></td><td>תהליכי מחזור החיים של המערכת.</td></tr>
+          <tr><td><bdi>ISO/IEC/IEEE 29148</bdi> ומדריך הכתיבה של INCOSE</td><td>איך כותבים דרישות טובות ואיך בודקים אותן.</td></tr>
+          <tr><td><bdi>ISO/IEC/IEEE 42010</bdi></td><td>מבטים על הארכיטקטורה.</td></tr>
+          <tr><td><bdi>ISO/IEC/IEEE 24748-7</bdi> ו-<bdi>24748-8</bdi></td><td>הנדסת מערכות בתוכניות ביטחוניות, וסקירות טכניות כמו SRR, SFR ו-PDR.</td></tr>
+          <tr><td><bdi>MIL-STD-498</bdi> ו-<bdi>MIL-STD-961</bdi></td><td>צורת המסמכים (OCD, SSS, IRS) ומבנה מפרט.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="block-title">שלושה אופני חשיבה, בו בזמן</h3>
+    <p class="sub">בשלבי התכן המושגי עובדים בשלושה אופנים יחד, ושניים מהם נוטים לקלקל זה את זה: ככל שחושבים יותר אנליטית, היצירתיות נחלשת. בכל שלב הצ'אט אומר באיזה אופן עובדים.</p>
+    <div class="modes">
+      <div class="mode blue"><h3>כחול: שיטתי</h3><p>כמותי ומסודר: לכתוב את כל הדרישות, לכתוב אותן נכון ולא לשכוח אף אחת.</p></div>
+      <div class="mode red"><h3>אדום: יצירתי</h3><p>להמציא עקרונות פתרון וקונספטים, הרבה ושונים זה מזה.</p></div>
+      <div class="mode green"><h3>ירוק: אנליטי</h3><p>לחשב, לאמוד ולהשוות, כדי לבחור בין הרעיונות.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="course">
+  <div class="wrap">
+    <span class="stage-tag">ספר הקורס</span>
+    <h2>הקורס "תכן הנדסי מערכתי מתקדם 1", כספר</h2>
+    <p class="sub">הקורס של ד"ר עמיהוד הרי בטכניון (038808), פרק לכל מפגש ובקולו: התיאוריה, הטבלאות, הדוגמאות ומצגת בעיצוב חדש. הספר נכתב לאורך הקורס, ופרק חדש מתווסף אחרי כל מפגש. כל פרק מפנה לשלב במסע שמיישם אותו.</p>
+    <ol class="meetings">
+      <li><a class="meeting ready" href="https://github.com/avisalmon/SystemEngineeringBKM/tree/main/course/01_intro"><span class="t">מפגש 1 · לקריאה</span>מבוא, השיטה וצורכי הלקוח</a></li>
+      <li><span class="meeting soon"><span class="t">מפגש 2 · בקרוב</span>איסוף וניתוח צורכי לקוח</span></li>
+      <li><span class="meeting soon"><span class="t">מפגש 3 · בקרוב</span>מאפיינים</span></li>
+      <li><span class="meeting soon"><span class="t">מפגש 4 · בקרוב</span>בית האיכות, טבלת החלטות ומפרט</span></li>
+      <li><span class="meeting soon"><span class="t">מפגש 5 · בקרוב</span>סדנת QFD</span></li>
+      <li><span class="meeting soon"><span class="t">מפגש 6 · בקרוב</span>הפשטה</span></li>
+      <li><span class="meeting soon"><span class="t">מפגש 7 · בקרוב</span>יצירת פתרונות</span></li>
+      <li><span class="meeting soon"><span class="t">מפגש 8 · בקרוב</span>מיון רעיונות</span></li>
+      <li><span class="meeting soon"><span class="t">מפגש 9 · בקרוב</span>מיזוג רעיונות</span></li>
+      <li><span class="meeting soon"><span class="t">מפגש 10 · בקרוב</span>הערכה ובחירה</span></li>
+      <li><span class="meeting soon"><span class="t">מפגש 11 · בקרוב</span>עקרונות התכן הפרה-לימינארי</span></li>
+      <li><span class="meeting soon"><span class="t">מפגש 12 · בקרוב</span>תכן פרה-לימינארי</span></li>
+      <li><span class="meeting soon"><span class="t">מפגש 13 · בקרוב</span>השלמות והצגת הפרויקט בכיתה</span></li>
+    </ol>
+    <p class="note"><b>זכויות.</b> כל הזכויות על תוכן הקורס שמורות לד"ר עמיהוד הרי. התוכן מתפרסם כאן באישורו ואינו חלק מרישיון MIT של המאגר.</p>
+  </div>
+</section>
+
+<section id="good">
+  <div class="wrap">
+    <span class="stage-tag">טוב לדעת</span>
+    <h2>לפני שיוצאים לדרך</h2>
+    <div class="grid g3">
+      <div class="card"><div class="icon" aria-hidden="true">🔄</div><h3>תמיד מעודכן</h3><p>בתחילת כל שיחה הצ'אט מושך את הגרסה האחרונה של המדריך. בפרויקטים שלכם, בתיקייה <code>my_projects</code>, העדכון לא נוגע.</p></div>
+      <div class="card"><div class="icon" aria-hidden="true">🔒</div><h3>הפרויקט נשאר שלכם</h3><p>כל פרויקט הוא מאגר git פרטי משלו, והנתונים נשמרים כקובצי JSON במחשב שלכם. צוות משתף מאגר פרטי אחד.</p></div>
+      <div class="card"><div class="icon" aria-hidden="true">⚠️</div><h3>בלי מידע מסווג</h3><p>הצ'אט הוא שירות ענן. לא מכניסים מידע מסווג או רגיש, וגם לא מספרי תעודת זהות.</p></div>
+      <div class="card"><div class="icon" aria-hidden="true">🎙️</div><h3>תמלול במחשב שלכם</h3><p>ראיונות מתומללים כברירת מחדל במחשב, במודל עברי פתוח. אפשר לבחור בתמלול בענן, עם מפתח משלכם.</p></div>
+      <div class="card"><div class="icon" aria-hidden="true">🎓</div><h3>לסטודנטים בקורס</h3><p>הקורס מתיר עבודה עם AI, עם נספח AI ודיווח שעות. הצ'אט עוזר לנהל את יומן העבודה עם ה-AI, והצוות נשאר אחראי לכל מה שמוגש.</p></div>
+      <div class="card"><div class="icon" aria-hidden="true">🚧</div><h3>בבנייה</h3><p>המדריך נבנה עכשיו, בנובמבר 2026, יחד עם הקורס. הספר גדל בפרק אחרי כל מפגש, והמנטור מתרחב שלב אחרי שלב.</p></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>מאת אבי סלמון · קוד פתוח (MIT) · תוכן הקורס שמור לד"ר עמיהוד הרי ומתפרסם באישורו, מחוץ לרישיון MIT</span>
+    <span><a href="https://github.com/avisalmon/SystemEngineeringBKM">GitHub</a> · <a href="https://github.com/avisalmon/SystemEngineeringBKM/tree/main/course">ספר הקורס</a></span>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    function done(btn) {
+      btn.textContent = "✓ הועתק";
+      setTimeout(function () { btn.textContent = "העתקה"; }, 1500);
+    }
+    document.querySelectorAll(".copy").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var code = btn.parentElement.querySelector("code");
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(code.innerText).then(function () { done(btn); });
+          return;
+        }
+        var range = document.createRange();
+        range.selectNodeContents(code);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        try { if (document.execCommand("copy")) done(btn); } catch (e) {}
+      });
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+# Python virtual environment: always the folder `env` (never commit it)
+env/
+# Environment-variable file (keys); never the virtualenv
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# The user's projects stay on their computer, each in its own private git repo,
+# so pulling updates never conflicts with them
+my_projects/*
+!my_projects/README.md
+
+# Maintainer mode: only in Avi's clone, never published
+CLAUDE.local.md
+
+# Raw course material (emails, recordings, transcripts, the original slides): private, never committed
+course_raw/
+
+# Rendered output and tool caches
+out/
+.impeccable/
+
+# Editors and OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+Thumbs.db
+.DS_Store
+~$*
+*.log
