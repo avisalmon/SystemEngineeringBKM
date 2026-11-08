@@ -1,6 +1,7 @@
 <!--
 Deck source format (SystemEngineeringBKM course book).
-A future renderer turns this file into HTML slides and a PowerPoint deck.
+`python -m sebkm render course` turns this file into slides.html, the deck on the guide's site.
+A PowerPoint export comes later.
 
 - The text before the first slide is the deck header: an H1 title and one blockquote.
 - Each slide starts with a level-2 heading: "## שקף N: <title>", numbered from 1.
