@@ -1,6 +1,6 @@
 # SystemEngineeringBKM: method spec
 
-Draft 2, November 2026 (Avi's answers in). Owner: Avi Salmon. This is the design record for whoever maintains the
+Draft 3, November 2026 (lessons 1 and 2 folded in). Owner: Avi Salmon. This is the design record for whoever maintains the
 guide. Users never need to read it; their chat does.
 
 ## 1. What it is
@@ -47,7 +47,7 @@ They know engineering. They may not know git, Python or the editor; the chat han
 | D5 | Production first. The AI drafts, humans approve. Learning mode (explain, let the user try, then critique) is offered, never forced. | Avi's call: an automated escort of the systems engineer. The course rules keep the human in the loop and require an AI log. |
 | D6 | Interview transcription is local by default (faster-whisper with `ivrit-ai/whisper-large-v3-turbo-ct2`), or through the user's own OpenAI key by choice. | Interviews stay on the machine unless the user decides otherwise. |
 | D7 | Hebrew for everything a user sees: chat, README, start page, journey, course book, generated documents. English for code, schemas, skill bodies and this spec; skills carry Hebrew and English triggers. Standard terms (SRR, PBS, QFD, HOQ) stay as they are. | The audience is Israeli; the AI works best with English instructions. |
-| D8 | The example project is window cleaning, in `examples/window_cleaning/`, grown lesson by lesson. Avi plays the customer. CI runs `check` and `render` on it. | A real, relatable system that shows every phase, and a living integration test. |
+| D8 | The example project is window cleaning, in `examples/window_cleaning/`, grown lesson by lesson. Each phase is seeded from the worked example in the book's chapters, then checked in a dry run from a fresh clone, with Avi reviewing as the customer. CI runs `check` and `render` on it. | A real, relatable system that shows every phase, and a living integration test. Seeding from the chapters keeps the book and the example telling the same story. |
 | D9 | Users never contribute. Every session starts with `scripts/check_updates.py` (pull `main`). Projects carry `schema_version`; `sebkm migrate` upgrades them. Anyone may keep a personal fork, but a fork of a public repository is always public, so project data stays in `my_projects/`. | The bkm-bkm rules. |
 | D10 | `course/` is © Dr. Amihud Hari, published with his permission, and is not covered by the MIT license. Third-party material is cited or linked, never copied. | His content, his terms. |
 | D11 | One engine, `sebkm`, in Python 3.12 inside `env/`. | python-docx, openpyxl, python-pptx and the faster-whisper wheels all exist for 3.12. |
@@ -65,8 +65,8 @@ state at each gate.
 | 0 | A working chat | | | | The chat answers in Hebrew and shows the journey. |
 | 1 | Computer ready | | | | `doctor` all green; a test Word file opens. Optional: the local transcription model. |
 | 2 | Project, team and need | Preparation | L1, Ex1 | Business or mission analysis | Project repo, the need phrased as a benefit or a problem (no solution), team, Ex1 table, first dashboard. |
-| 3 | Customers and needs | 1 | L2-L3, Ex2 items 1-7 | Stakeholder needs and requirements definition | Stakeholder map, interviews, reference scenarios, needs tree with a pruning line, priorities (NGT), reference products, Benchmark 1. |
-| 4 | From needs to a specification | 2 | L3-L5, Ex2 items 8-13 | System requirements definition; SRR | Characteristics, external interfaces, House of Quality, Benchmark 2, decision table (TVDT), PBS, CSR curves, SRR package, git tag `SRR`. |
+| 3 | Customers and needs | 1 | L2-L3, Ex2 items 1-7 | Stakeholder needs and requirements definition | Stakeholder map, interviews, reference scenarios, needs tree with a pruning line, priorities (NGT), reference products, Benchmark 1 and a first Benchmark 2 (Ex2.7 asks for both). |
+| 4 | From needs to a specification | 2 | L3-L5, Ex2 items 8-13 | System requirements definition; SRR | Characteristics, external interfaces, House of Quality, the full Benchmark 2, decision table (TVDT), PBS, CSR curves, SRR package, git tag `SRR`. |
 | 5 | Abstraction and solution principles | 3-5 | L6-L8, Ex3 items 1-6 | Architecture definition (functional view) | Functional analysis, models, FAST, basic problems, solution principles with an AI Red Team, criteria A and B, morphological table. |
 | 6 | Concepts and main concepts | 6-7 | L9-L10, Ex3 items 7-10 | Decision management | Concept cards, Pugh matrix, at least three substantially different main concepts. |
 | 7 | Architecture of the main concepts | 8 | L11-L12, Ex3 items 11-17 | Architecture and design definition, interface management, system analysis (toward SFR) | Visual, logical and block diagrams, interfaces and ICD, AI "critical systems engineer" review, sizing and sensitivity, operations, integration and maintenance concepts, compliance table, 3D briefs. |
@@ -77,8 +77,8 @@ the phase checklist is done; documents are rendered; `PROGRESS.md` is updated. P
 QRD paper puts it, the SRR does not solve problems; it documents the consensus that a product meeting the PBS
 will meet the voice of the customer, and it confirms the resources are there.
 
-The course plan does not say which Ex2 items belong to parts 2א, 2ב and 2ג. Likely by lesson topic: 1-5, 6-8 and
-9-13. To be confirmed with Amihud.
+Lesson 2 settled part 2א: Ex2 items 1-7, presented at lesson 3. Items 8-13 follow in parts 2ב and 2ג; which item
+goes where is to be confirmed with Amihud.
 
 ## 5. The project and its data
 
@@ -101,11 +101,11 @@ my_projects/<name>/              its own private git repo
 
 1. **One item, one file.** The file name is the ID. Small diffs, easy merges, and the AI reads only what it needs.
 2. **Stable IDs.** `PREFIX-NNN`, assigned by the engine, never reused. A withdrawn item keeps its file with status
-   `withdrawn` and a reason. Display numbers (needs tree 1.2.3, PBS paragraphs) are computed from parent links and
-   order; they are never identity.
+   `withdrawn` and a reason. Display numbers (needs tree 1.2.3, scenario states 1.5, PBS paragraphs) are computed
+   from parent links and order; they are never identity.
 3. **Store judgments, compute numbers.** Stored: HOQ cell values, NGT votes, Pugh marks, targets, thresholds,
-   difficulty levels. Computed: HOQ totals, relative weights and ranks, NGT averages, Pugh sums, coverage,
-   display numbers, check results.
+   difficulty levels. Computed: HOQ totals, relative weights and ranks, NGT means, spreads and ranks, Pugh sums,
+   coverage, display numbers, check results.
 4. **Each link is stored once,** on the item that knows it: a need lists its sources and scenario states, a
    requirement lists its sources and characteristic, a test lists the requirements it verifies. Reverse links are
    computed.
@@ -131,18 +131,19 @@ my_projects/<name>/              its own private git repo
 
 | Prefix | Item | Comes from |
 |---|---|---|
-| MEM | Team member: name, discipline, experience, contact. Never a national ID number. | QRD 01, Ex1 |
+| MEM | Team member: name, email, degree (institution and year), experience (workplace, years, expertise, what they bring to the team). Never a national ID number; Ex1's address and phone columns are left for the team to fill by hand. | QRD 01, Ex1 |
+| CAND | Candidate need (Ex1 sheet 2), at least one per member, in the team's order: the need and its proposer, a short explanation with four or five main performance requirements (a price or cost target when relevant), other solutions, possible interviewees. The chosen one (in the course, the lecturer assigns it) becomes the need in `project.json`. | Ex1 |
 | STK | Customer or stakeholder: place in the customer chain, what we know, what is missing | QRD 03, Ex2.2 |
 | INT | Interview, observation or session: who, when, method, consent, recording, transcript | Ex2.3, Needs slides 9-10 |
 | SRC | Source: kind, citation, link, date, reliability and why. AI is never a source. | Ex2.7 |
 | ASM | Assumption: statement, why, how to check it | Ex2.1 |
-| SCN | Reference scenario: type, actors, states (description, trigger, next state, needs, sizing factors, functions) | QRD 04-05, Ex2.4 |
-| NEED | Customer need: customer language, positive, solution-free, usually no numbers; parent, Kano class, pruning | QRD 06, Ex1, Ex2.5 |
-| NGT | Prioritization round: participants, votes | QRD 07, Ex2.6 |
-| RR | Requirement request as received: who asked, its real type (need, characteristic, function, design principle, test method, constraint), the decision (accept, accept with changes, reject) and the items it became | QRD 08-09, QRD paper |
-| REF | Reference product: Benchmark 1 (which needs and scenarios it answers), Benchmark 2 (values per characteristic), a source for every value | QRD 17-18, Ex2.7 |
+| SCN | Reference scenario: a title of ten words at most; its type, one or more of chapter 1's 16 scenario types (a synthetic scenario, which gathers many troubles into one story, is marked `synthetic`); actors, arena, adversary (optional), picture (optional). States in order, each with a stable key (`s1`, `s2`..., never reused; the number shown is computed from the order), what happens, the exit event, the next states (a list, so a state can branch), and `no_needs` when it yields none. Needs, characteristics and functions point to a state (`SCN-001#s4`) from their own items; the scenario table shows them through computed columns. | QRD 04-05, Ex2.4, L1-L2 |
+| NEED | Customer need: customer language, solution-free, usually no numbers, preferably positive; parent and order among its siblings (the root, with no parent, is the project's need; numbers such as 3.1 are computed); the scenarios or states it comes from (`SCN-001` or `SCN-001#s4`), or other sources when no scenario yields it; Kano class; `line: true` when the pruning line passes through it (the trunk and the pruned needs are computed, and pruned needs stay in the tree) | QRD 06, Ex1, Ex2.5, L2 |
+| NGT | Prioritization round: its number; participants (a MEM or STK, a label and a weight; the voice of the customer weighs more); each participant's 100 points over the needs inside the pruning line; explanations of changes since the previous round (need, who, why). The weighted mean, the unweighted population STD, the ranks and the changes are computed. | QRD 07, Ex2.6, L2 |
+| RR | Requirement request as received: its text; who asked; its real types, one or more of need, scenario, characteristic, function, design principle, test method, constraint; the system element; the rationale as a chain of whys; how the asker would verify it; the decision (accept, accept with changes, reject). The items it became list it in their `sources`, so that link is computed. | QRD 08-09, QRD paper, L2 |
+| REF | Reference product. Benchmark 1: a cell per need and per scenario, full, partial, none or unknown. Benchmark 2: a value per characteristic, each with its unit, source and reliability (high, medium-high, medium, low, or not published: a gap, never a number). The best product per row and the opportunities (rows no product answers well) are computed. | QRD 17-18, Ex2.7, L2 |
 | EXT | External entity: neighbor system, platform, environment, regulation | QRD 11 |
-| CHR | Characteristic: family, definition, unit or ordinal scale, range of debate, HOQ yes or no, mandatory; and its decision-table row: trade-offs, reference values, target, threshold, difficulty (technical, cost, TTM), conceptual implication | QRD 12-13, 15; Ex2.8, 2.10 |
+| CHR | Characteristic: family, definition, unit or ordinal scale, range of debate, HOQ yes or no, mandatory; and its decision-table row: trade-offs, reference values, target, threshold, difficulty (technical, cost, TTM), conceptual implication; whether higher or lower is better. Phase 3 needs only the title, unit and direction, for the first Benchmark 2. | QRD 12-13, 15; Ex2.8, 2.10 |
 | HOQ | House of Quality: needs (by scenario) against characteristics, cells 9, 3 or 1, roof correlations | QRD 14, Ex2.9 |
 | REQ | Performance requirement, a PBS row: statement, type, characteristic, target, threshold, rationale, sources, verification method (inspection, analysis, demonstration, test), CSR points, allocation | QRD 16, Ex2.11-12 |
 | TST | Verification activity: the requirements it verifies, method, success criteria | QRD 16, 29148 |
@@ -159,7 +160,7 @@ my_projects/<name>/              its own private git repo
 | RSK | Risk: cause, consequence, likelihood, impact, mitigation | Ex3.11 |
 | DEC | Decision record: question, options, decision, rationale, the items it traces back to | Ex2.6, Ex2.10 |
 | ACT | Action item: what, who, by when (the "AI" column of the decision table means action items) | QRD 15 |
-| CHK | Checklist instance: each line open, done or not applicable, with evidence | QRD 05, 11, 13, 19 |
+| CHK | Checklist instance: each line open, done or not applicable (with a reason), with evidence. The scenario checklist has a line per scenario type: covered by a SCN, or not relevant. | QRD 05, 11, 13, 19; L2 |
 | AIL | AI use: task, tool, what the AI produced, what the team did with it and why | Every exercise's AI appendix |
 
 Hours per exercise item (the course reports them, AI hours included) go in `log/hours.json`.
@@ -192,15 +193,16 @@ requirements by concepts (compliance).
 
 `python -m sebkm check [--phase N]` and `python -m sebkm lint`.
 
-**Errors, always:** schema violations, duplicate IDs, a file name that is not its ID, broken links, links to the
-wrong type, cycles in parent links.
+**Errors, always:** schema violations, duplicate IDs, a file name that is not its ID, broken links (a scenario
+state's next state included), links to the wrong type, cycles in parent links, an NGT participant whose points do
+not add up to 100.
 
 **Warnings, by phase** (a gate needs each one fixed or waived with a DEC):
 
 | Phase | Warns when |
 |---|---|
-| 3 | A need has no source or origin; a quoted need has no interview; a scenario state lists no needs and does not say "none"; no pruning line; a need above the line has no priority; course mode: fewer than two NGT rounds; a benchmark value has no source. |
-| 4 | A need above the pruning line has no HOQ relation of 9 or 3; a characteristic relates to no need and has no reason; a mandatory characteristic is missing (unit production cost, MTBF, MTTR at user level, TTM, development cost or knowledge gap, human operation); a decision-table row has no target, threshold or difficulty; a requirement lacks a source, rationale, threshold or verification method; an operational scenario has no demonstration requirement; an external-interface category is neither covered nor marked not applicable; course mode: fewer than three significant decisions traced back; a main requirement has no CSR curve. |
+| 3 | A need has no source or origin; a quoted need has no interview; a scenario state has no need pointing to it and is not marked `no_needs`; a scenario has four states or fewer, or more than twelve; a scenario title runs over ten words; a scenario type is neither covered nor marked not relevant on the scenario checklist; no pruning line, or a path from the root to a leaf that does not cross it exactly once; more than 30 needs inside the line; a need inside the line has no priority; a benchmark value has no source or reliability; course mode: fewer than two NGT rounds or two explained changes, a member with no scenario of their own (Ex2.4). |
+| 4 | A need inside the pruning line has no HOQ relation of 9 or 3; a characteristic relates to no need and has no reason; a mandatory characteristic is missing (unit production cost, MTBF, MTTR at user level, TTM, development cost or knowledge gap, human operation); a decision-table row has no target, threshold or difficulty; a requirement lacks a source, rationale, threshold or verification method; an operational scenario has no demonstration requirement; an external-interface category is neither covered nor marked not applicable; course mode: fewer than three significant decisions traced back; a main requirement has no CSR curve. |
 | 5 | A basic problem has no function or requirement behind it; a principle has no evaluation; a Red Team critique has no team decision; criteria A or B are missing; a basic problem is missing from the morphological table. |
 | 6 | Course mode: a member has no combination or card; a card fails the card checklist; a Pugh evaluation has no datum or a member did not vote; fewer than three main concepts, or two that differ in too few principles. |
 | 7 | A main concept lacks a visual, logical or block view; an interface has one end; an element has no function; a key requirement is not allocated; fewer than two critic insights applied; sizing uses different requirements across concepts; the operations concept lacks a nominal, a logistic or an accident scenario; no integration chart; no compliance table. |
@@ -208,14 +210,16 @@ wrong type, cycles in parent links.
 
 **Writing lint** (deterministic, Hebrew aware; adapted from the INCOSE GtWR):
 
-- Needs: no numbers or units, no negation, no solution words (the project keeps its own list), a proposer.
+- Needs: no numbers or units, no solution words (the project keeps its own list), a proposer. A negation is only a
+  hint for the AI critic: the course's own needs say "בלי פינות חדות" and "ולא פועל כשלא צריך".
 - Requirements: one requirement per statement, the future-tense form ("המשקל הכולל לא יעלה על 60 גרם"), no
   "ו/או", no vague words ("קל", "מהיר", "ידידותי", "מינימלי", "אופטימלי"...), no escape clauses ("ככל הניתן",
   "במידת האפשר"), no open ends ("וכו'"), a number with a unit or a link to a characteristic's threshold, no TBD
   after SRR.
 
-On top of the lint, the AI critic reviews meaning (solution-free needs, ambiguity, missing or conflicting
-requirements) and always returns a review table. The human decides.
+On top of the lint, the AI critic reviews meaning (solution-free needs, negations, holes in the needs tree such as
+sons without a father or fathers without sons, ambiguity, missing or conflicting requirements) and always returns a
+review table. The human decides.
 
 ## 7. The engine
 
@@ -243,7 +247,7 @@ Schemas live in `schemas/<type>.schema.json` (JSON Schema 2020-12).
 
 | Output | Format | Notes |
 |---|---|---|
-| Ex1 table | xlsx | The course's columns. The national ID column is left empty for the student to fill by hand. |
+| Ex1 table | xlsx | The course's columns. The national ID, address and phone columns are left empty for the student to fill by hand. |
 | Ex2 and Ex3 reports | docx | Cover, one-page executive summary, contents, the exercise's numbering, summary with hours, bibliography, appendices, AI appendix. |
 | QRD workbook | xlsx | The QRD Formats sheets, filled from the model. |
 | Weekly presentation | pptx | 25 minutes, fonts of 18 or more, derived from the report. |
@@ -268,8 +272,9 @@ organization and aesthetics. The templates follow that.
 
 **HTML** in `out/html/`, static and offline, Hebrew and right to left. The data is embedded as a script, so the
 pages open straight from disk with no server. Dashboard (phase, progress, check status, coverage, actions, risks,
-recent decisions), trace explorer, needs tree, scenarios, HOQ heat map, decision table, PBS, CSR charts, FAST,
-morphological table, Pugh, concept cards, block diagrams, N² matrix, checklist status.
+recent decisions), trace explorer, needs tree with its pruning line, scenario tables and flowcharts, NGT ranking,
+Benchmarks 1 and 2, HOQ heat map, decision table, PBS, CSR charts, FAST, morphological table, Pugh, concept cards,
+block diagrams, N² matrix, checklist status.
 
 **How:**
 
@@ -292,6 +297,9 @@ Every step of every phase runs the same loop, the course's human, AI, human cycl
 5. **Review.** A table in the chat (ID, text, origin, issues, suggestion). The human approves, edits or rejects;
    changes and rejections land in the AI log.
 6. **Render.** Documents, dashboard and `PROGRESS.md` are updated.
+
+One exception to production first (D5): the user writes the first scenario by hand, as the lecturer asks. The
+mentor reviews it, and can draft the rest.
 
 Two modes in one data model: **course mode** (exercise numbering, the course minimums and formats, deadlines from
 the course plan, personal parts marked) and **professional mode** (standard documents and reviews). And two
@@ -450,11 +458,40 @@ LICENSE                      MIT (course/ excluded)
 ## 21. Open questions
 
 For Avi: none open. Settled in draft 2: the phases and ID prefixes as written; 3D briefs now and CAD later (D13);
-slides recreated, never copied (D14); this spec stays in English (D7); the entry skill is `se-guide`.
+slides recreated, never copied (D14); this spec stays in English (D7); the entry skill is `se-guide`. Settled in
+draft 3: the phase 2 and 3 data model from lessons 1 and 2 (sections 5 and 6), the example seeded from the chapters
+(D8), and the build order (section 22).
 
 For Amihud:
 
-- Which Ex2 items belong to parts 2א, 2ב and 2ג.
+- Which of Ex2 items 8-13 belong to part 2ב and which to 2ג (2א is items 1-7).
+- The NGT standard deviation: his slides show the population value (flashlight need 1.1: 3.5), while the course
+  workbooks compute the sample one (`STDEV`: 3.8). The guide uses the population value; the ranks do not change.
 - The card checklist (slide 12) referenced in Ex3 items 7 and 10.
 - Where the lesson recordings will come from.
 - Whether he wants to review each chapter and deck before it is published.
+
+## 22. Build order
+
+Agreed 16.11.2026. Thin slices, one PR each, each usable when it lands:
+
+1. **Scaffold,** by the bkm-bkm method, with the machinery from De10LiteBKM: the Hebrew README, `CLAUDE.md`,
+   `se-guide`, `setup-my-computer`, `check_updates`, `sync_skills` (the Claude and Copilot copies), `doctor`,
+   `my_projects/README.md`, LICENSE and the hygiene tests. After it, "מה אני עושה פה?" works.
+2. **Schemas** for phases 2 and 3: the common fields, project, MEM, CAND, STK, INT, SRC, ASM, SCN, NEED, NGT, RR,
+   REF, a minimal CHR, CHK, DEC, AIL.
+3. **Engine:** `new`, `add`, `check` (the errors and phase 3), `lint` (needs), `status`, `render` (the scenario
+   table and flowchart, the needs tree with its line, NGT, Benchmarks 1 and 2, the dashboard), and `forms` and
+   `import` for NGT.
+4. **Skills:** `se-needs` first, then `se-project`, `se-research`, and `se-interview` with a pasted or imported
+   transcript.
+5. **The example,** `examples/window_cleaning/`, seeded from chapters 1 and 2, with CI running `check` and `render`
+   (D8).
+6. **A dry run** from a fresh clone, in Claude Code and in Copilot, with Avi reviewing as the customer.
+
+`se-needs` and the NGT forms come first because Avi's course team uses them for Ex2. Office files (the Ex2 Word
+report, the workbook) come after the HTML views; the NGT forms are the exception, because members outside the chat
+need them to vote.
+
+Then lesson by lesson: lesson 3 completes CHR and starts phase 4. Local transcription comes in the first slice after
+these six; until then the user pastes or imports a transcript.
